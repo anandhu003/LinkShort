@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  linkshort:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+      - ./url_shortener.db:/app/url_shortener.db
+    environment:
+      - DATABASE_URL=sqlite:///./url_shortener.db
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - linkshort-network
+
+networks:
+  linkshort-network:
+    driver: bridge

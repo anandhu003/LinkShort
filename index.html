@@ -714,7 +714,8 @@
     </div>
 
     <script>
-        const API_URL = 'http://127.0.0.1:8000';
+        // Dynamically detect API URL based on current location
+        const API_URL = window.location.origin;
         
         const originalUrlInput = document.getElementById('originalUrl');
         const customAliasInput = document.getElementById('customAlias');
