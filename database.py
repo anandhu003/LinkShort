@@ -1,12 +1,19 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
 
-# Create SQLite database
-DATABASE_URL = "sqlite:///./url_shortener.db"
+load_dotenv()
+
+# PostgreSQL database URL
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql://linkshort:linkshort@localhost:5432/linkshort"
+)
 
 engine = create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False}
+    DATABASE_URL, pool_pre_ping=True
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

@@ -1,15 +1,49 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:15-alpine
+    container_name: linkshort_db
+    environment:
+      POSTGRES_USER: linkshort
+      POSTGRES_PASSWORD: linkshort
+      POSTGRES_DB: linkshort
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - linkshort-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U linkshort"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer:latest
+    container_name: linkshort_adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - linkshort-network
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+
   linkshort:
     build: .
+    container_name: linkshort_app
     ports:
       - "8000:8000"
     volumes:
       - ./:/app
-      - ./url_shortener.db:/app/url_shortener.db
     environment:
-      - DATABASE_URL=sqlite:///./url_shortener.db
+      DATABASE_URL: postgresql://linkshort:linkshort@db:5432/linkshort
+    depends_on:
+      db:
+        condition: service_healthy
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     networks:
       - linkshort-network
@@ -17,3 +51,6 @@ services:
 networks:
   linkshort-network:
     driver: bridge
+
+volumes:
+  postgres_data:
